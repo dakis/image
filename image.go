@@ -173,7 +173,7 @@ func (i *Image) Resize(targetWidth, targetHeight uint, aspectRatio bool) (err er
 		return nil
 	}
 
-	return i.wand.ScaleImage(targetWidth, targetHeight)
+	return i.wand.ResizeImage(targetWidth, targetHeight, imagick.FILTER_LANCZOS2, 1)
 }
 
 func (i *Image) Extend(width, height uint) (err error) {
