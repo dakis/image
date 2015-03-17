@@ -66,7 +66,7 @@ func (i *Image) Format() string {
 
 func (i *Image) QuantumRange() uint {
 	if i.quantumRange == 0 {
-		i.quantumRange = 255
+		_, i.quantumRange = imagick.GetQuantumRange()
 	}
 
 	return i.quantumRange
