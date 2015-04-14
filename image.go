@@ -38,7 +38,11 @@ func New(data *bytes.Buffer) *Image {
 		if err == nil {
 			orientation, _ := strconv.ParseInt(tag.String(), 10, 0)
 			i.orientation = imagick.OrientationType(orientation)
+		} else {
+			fmt.Println("error when getting orientation")
 		}
+	} else {
+		fmt.Println("can't detect exif data", err)
 	}
 
 	if err := i.SetBytes(data.Bytes()); err != nil {
