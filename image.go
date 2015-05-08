@@ -30,23 +30,26 @@ func New(data *bytes.Buffer) *Image {
 		wand: imagick.NewMagickWand(),
 	}
 
+	if err := i.SetBytes(data.Bytes()); err != nil {
+		return nil
+	}
+
 	exifData, err := exif.Decode(bytes.NewReader(data.Bytes()))
 
 	if err == nil {
 		tag, err := exifData.Get(exif.Orientation)
 
 		if err == nil {
-			orientation, _ := strconv.ParseInt(tag.String(), 10, 0)
-			i.orientation = imagick.OrientationType(orientation)
-		} else {
-			fmt.Println("error when getting orientation")
+			orientation, err := strconv.ParseInt(tag.String(), 10, 0)
+
+			if err == nil {
+				i.orientation = imagick.OrientationType(orientation)
+			}
 		}
-	} else {
-		fmt.Println("can't detect exif data", err)
 	}
 
-	if err := i.SetBytes(data.Bytes()); err != nil {
-		return nil
+	if err != nil {
+		i.orientation = i.wand.GetImageOrientation()
 	}
 
 	return i
