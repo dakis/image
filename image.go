@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gographics/imagick/imagick"
+	"gopkg.in/gographics/imagick.v2/imagick"
 	"github.com/rwcarlsen/goexif/exif"
 	"math"
 	"strconv"
