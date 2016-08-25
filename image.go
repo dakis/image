@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"gopkg.in/gographics/imagick.v2/imagick"
 	"github.com/rwcarlsen/goexif/exif"
+	"gopkg.in/gographics/imagick.v2/imagick"
 	"math"
 	"strconv"
 )
@@ -223,6 +223,19 @@ func (i *Image) SetContrast(contrast float64) (err error) {
 
 func (i *Image) SetGrayscale() (err error) {
 	return i.wand.SetImageType(imagick.IMAGE_TYPE_GRAYSCALE)
+}
+
+func (i *Image) SetWhiteFade(targetWhiteFade string) (err error) {
+	colorize := imagick.NewPixelWand()
+	opacity := imagick.NewPixelWand()
+	var color string = fmt.Sprintf("hsl(0, 0%%, %s%%)", targetWhiteFade)
+
+	defer colorize.Destroy()
+	defer opacity.Destroy()
+
+	colorize.SetColor("white")
+	opacity.SetColor(color)
+	return i.wand.ColorizeImage(colorize, opacity)
 }
 
 func (i *Image) SetSepia(threshold float64) (err error) {
