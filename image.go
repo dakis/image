@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gographics/imagick/imagick"
 	"github.com/rwcarlsen/goexif/exif"
+	"gopkg.in/gographics/imagick.v2/imagick"
 	"math"
 	"strconv"
 )
@@ -30,19 +30,26 @@ func New(data *bytes.Buffer) *Image {
 		wand: imagick.NewMagickWand(),
 	}
 
+	if err := i.SetBytes(data.Bytes()); err != nil {
+		return nil
+	}
+
 	exifData, err := exif.Decode(bytes.NewReader(data.Bytes()))
 
 	if err == nil {
 		tag, err := exifData.Get(exif.Orientation)
 
 		if err == nil {
-			orientation, _ := strconv.ParseInt(tag.String(), 10, 0)
-			i.orientation = imagick.OrientationType(orientation)
+			orientation, err := strconv.ParseInt(tag.String(), 10, 0)
+
+			if err == nil {
+				i.orientation = imagick.OrientationType(orientation)
+			}
 		}
 	}
 
-	if err := i.SetBytes(data.Bytes()); err != nil {
-		return nil
+	if err != nil {
+		i.orientation = i.wand.GetImageOrientation()
 	}
 
 	return i
@@ -216,6 +223,19 @@ func (i *Image) SetContrast(contrast float64) (err error) {
 
 func (i *Image) SetGrayscale() (err error) {
 	return i.wand.SetImageType(imagick.IMAGE_TYPE_GRAYSCALE)
+}
+
+func (i *Image) SetWhiteFade(targetWhiteFade string) (err error) {
+	colorize := imagick.NewPixelWand()
+	opacity := imagick.NewPixelWand()
+	var color string = fmt.Sprintf("hsl(0, 0%%, %s%%)", targetWhiteFade)
+
+	defer colorize.Destroy()
+	defer opacity.Destroy()
+
+	colorize.SetColor("white")
+	opacity.SetColor(color)
+	return i.wand.ColorizeImage(colorize, opacity)
 }
 
 func (i *Image) SetSepia(threshold float64) (err error) {
